@@ -2,9 +2,7 @@
 ##################################################################################################
 #
 #	SCRIPT:		script02.sh
-#	AUTHOR:		L. Dennis (Larry.Dennis@cci.fsu.edu)
-#	DATE:		Nov. 1, 2015
-#	VERSION:	1.0
+#	AUTHOR:		M. Ozmen
 #
 #	PURPOSE:	This script returns sales information for a specific year from sales 
 #			database.  Script requires the year, model name and sales type (all, new, used)
