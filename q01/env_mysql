@@ -1,0 +1,4 @@
+export MYSQLU='salesadmin'
+export MYSQLP='admin123'
+export REPORTS='~/reports'
+export ARCHIVE='~/archive'
