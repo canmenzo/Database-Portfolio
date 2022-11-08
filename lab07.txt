@@ -1,0 +1,478 @@
+Activity 7: submission file lab07.txt
+
+    Name:    Mehmet Ozmen
+    User:    mco20m
+    Host:    vma22
+    Date:    Thursday, Apr 15, 2021
+    Time:    19:22
+    USID:    47D5C1T#J2M2Fa7mFvN{N1G200q24%6m20A2NopcAm5!72u2c:N9z1i*ynGe0mUzWOJ}y7c06ag@xr8pfAf-Wt8e0mJhNekM
+
+BEGIN QUESTION 1
+    Checking for required files
+
+        Start output of a01.txt
+            QUESTION 1: Script Creation
+            
+            Please do NOT delete any characters in this file.
+            The file a01.bak contains a backup copy of this file if you need it.
+            Create your script in the file q01.sh. Enter DONE on the line below
+            when you have completed your work.
+            
+            A. DONE 
+            
+            END OF QUESTION 1: This unedited file contains 320 characters.
+
+        End output of a01.txt
+
+
+        Start output of check01.txt
+            Checking for q01.sh
+                       OK - q01.sh found                                                  chxq01-A1
+            
+            Checking to see that all environment variables have been set
+                       OK - all environment variables set in q01                          chxq01-B1
+                       OK - all environment variables set in q02                          chxq01-C1
+                       OK - all environment variables set in q03                          chxq01-D1
+                       OK - all environment variables set in q04                          chxq01-E1
+                       OK - all environment variables set in q05                          chxq01-F1
+            
+
+        End output of check01.txt
+
+
+        Start output of q01.sh
+            #!/bin/bash
+            
+            file=env_mysql
+            
+            if [ ! -e $file ]; then
+            	touch $file
+            else
+            	rm $file
+            	touch $file
+            fi
+            
+            echo "export MYSQLU='salesadmin'" >> $file
+            echo "export MYSQLP='admin123'" >> $file
+            echo "export REPORTS='~/reports'" >> $file
+            echo "export ARCHIVE='~/archive'" >> $file
+            
+            for i in {2..5}
+            do
+            	cd ../q0$i
+            	if [ ! -L $file ]; then
+            		ln -s ../q01/$file $file
+            	fi
+            done
+
+        End output of q01.sh
+
+
+        Start output of env_mysql
+            export MYSQLU='salesadmin'
+            export MYSQLP='admin123'
+            export REPORTS='~/reports'
+            export ARCHIVE='~/archive'
+
+        End output of env_mysql
+
+    All files found for question 1.
+END QUESTION 1
+
+BEGIN QUESTION 2
+    Checking for required files
+
+        Start output of a02.txt
+            QUESTION 2: Script Creation
+            
+            Please do NOT delete any characters in this file.
+            The file a02.bak contains a backup copy of this file if you need it.
+            Create your script in the file q02.sh. Enter DONE on the line below
+            when you have completed your work.
+            
+            A. DONE 
+            
+            END OF QUESTION 2: This unedited file contains 320 characters.
+
+        End output of a02.txt
+
+
+        Start output of check02.txt
+            Checking script q02.sh performance
+                       OK - passed test for all car sales                           chxq02-A1
+                       OK - passed test for new car sales                           chxq02-B1
+                       OK - passed test for used car sales                          chxq02-C1
+            
+
+        End output of check02.txt
+
+
+        Start output of q02.sh
+            #!/bin/bash
+            
+            
+            ### variables
+            year=$1
+            model=$2
+            type=$3
+            
+            ### validations
+            if [ $# -ne 3 ]; then
+            	echo "need to enter 3 parameters (year,model,type)"
+            	exit
+            fi
+            
+            if [ ! -e env_mysql ]; then
+            	ln -s ../q01/env_mysql env_mysql
+            fi
+            
+            source env_mysql
+            
+            if [ ! -e q02.sql ]; then
+            	touch q02.sql
+            else
+            	rm q02.sql
+            fi
+            
+            ### if blocks
+            if [ $type == "all" ]; then
+            	cat > q02.sql <<SQL
+            	use sales;
+            	SELECT COUNT(*), SUM(dealer_cost), SUM(price_sold), SUM(price_list) FROM sales_$year WHERE model_name='$model';
+            SQL
+            elif [ $type == "new" ] || [ $type == "used" ]; then
+            	cat > q02.sql <<SQL
+            	use sales;
+            	SELECT COUNT(*), SUM(dealer_cost), SUM(price_sold), SUM(price_list) FROM sales_$year WHERE model_name='$model' AND sales_type='$type';
+            SQL
+            else
+            	echo "type needs to be new, used or all"
+            	exit
+            fi
+            
+            salesdata=$(mysql -u $MYSQLU -p$MYSQLP < q02.sql 2>/dev/null | grep -iv count | grep -iv sum)
+            
+             
+            #
+            #for i in {0..4}
+            #do
+            #	if [ "${salesdata[$i]}" == "NULL" ]; then
+            #		salesdata[$i]=0
+            #	fi
+            #	echo "$year ${salesdata[@]}"
+            #done
+            #
+            # 
+            
+            echo $year ${salesdata[@]}
+
+        End output of q02.sh
+
+    All files found for question 2.
+END QUESTION 2
+
+BEGIN QUESTION 3
+    Checking for required files
+
+        Start output of a03.txt
+            QUESTION 3: Script Creation
+            
+            Please do NOT delete any characters in this file.
+            The file a03.bak contains a backup copy of this file if you need it.
+            Create your script in the file q03.sh. Enter DONE on the line below
+            when you have completed your work.
+            
+            A. DONE 
+            
+            END OF QUESTION 3: This unedited file contains 320 characters.
+
+        End output of a03.txt
+
+
+        Start output of check03.txt
+            Checking script q03.sh performance
+                       OK - report.tmp contains all years for all, new and used car sales by model                           chxq03-A1
+                       OK - passed test for sales by model                                                                   chxq03-B1
+                       OK - passed sum rule test: Total = New + Used                                                         chxq03-C1
+                       OK - passed report fixed line length test                                                             chxq03-D1
+                       OK - passed invalid parameter test                                                                    chxq03-E1
+            
+
+        End output of check03.txt
+
+
+        Start output of q03.sh
+            #!/bin/bash
+            
+            ### variables
+            model=$1
+            rep="report.tmp"
+            match=0
+            
+            ### validations and soft links
+            if [ $# -ne 1 ]; then
+            	echo "Enter model name"
+            fi
+            
+            if [ ! -e model.sh ]; then
+            	ln -s ~/class/a07/q02/q02.sh model.sh
+            fi
+            
+            if [ ! -e env_mysql ]; then
+            	ln -s ~/class/a07/q01/env_mysql env_mysql
+            fi
+            source env_mysql
+            
+            if [ -e $rep ]; then
+            	rm $rep
+            	touch $rep
+            fi
+            
+            
+            ### sql code
+            cat > q03.sql <<SQL
+            	use sales;
+            	select distinct(model_name) from sales_2016;
+            SQL
+            
+            
+            ### model names into a models array
+            models=($(mysql -u $MYSQLU -p$MYSQLP < q03.sql 2> /dev/null | grep -iv model_name))
+            
+            
+            ### model name validation
+            for m in "${models[@]}"
+            do
+            	if [ "$m" == "$model" ]; then
+            		match=1
+            	fi
+            done
+            
+            if [ "$match" == "0" ]; then
+            	echo "Invalid model name: $model"
+            	if [ -e $rep ]; then
+            		rm $rep
+            	fi
+            	exit
+            fi
+            
+            echo "Sales, Profit and Discount Report: $model" >> $rep
+            echo " " >> $rep
+            
+            for type in all new used
+            do
+            	echo "Type=$type" >> $rep
+            	echo "Number 	Dealer	 Sales	 List 			" >> $rep
+            	echo "Year 	Sold	 Cost 	 Value	  Price		" >> $rep
+            	echo "=====	=====	 =====	 =====	  =====		" >> $rep
+            
+            	for year in {2010..2016}
+            	do
+            		salesdata=$(./model.sh $year $model $type)
+            		number=${salesdata[1]}
+            		dcost=${salesdata[2]}
+            		psold=${salesdata[3]}
+            		plist=${salesdata[4]}
+            		printf "%4s %9s %13s %13s %13s \n" ${salesdata[@]} >> $rep
+            	done
+            	echo " ================================================ " >> $rep
+            	echo " " >> $rep
+            done
+
+        End output of q03.sh
+
+    All files found for question 3.
+END QUESTION 3
+
+BEGIN QUESTION 4
+    Checking for required files
+
+        Start output of a04.txt
+            QUESTION 4: Script Creation
+            
+            Please do NOT delete any characters in this file.
+            The file a04.bak contains a backup copy of this file if you need it.
+            Create your script in the file q04.sh. Enter DONE on the line below
+            when you have completed your work.
+            
+            A. DONE 
+            
+            END OF QUESTION 4: This unedited file contains 320 characters.
+
+        End output of a04.txt
+
+
+        Start output of check04.txt
+            Checking script performance
+                       OK - report.tmp contains all years for all, new and used car sales by model                           chxq04-A1
+                       OK - passed test for sales by model                                                                   chxq04-B1
+                       OK - report contains fixed length output data                                                         chxq04-C1
+            
+
+        End output of check04.txt
+
+
+        Start output of q04.sh
+            #!/bin/bash
+            
+            ### variables
+            model=$1
+            rep="report.tmp"
+            match=0
+            
+            ### validations and soft links
+            if [ $# -ne 1 ]; then
+            	echo "Enter model name"
+            fi
+            
+            if [ ! -e model.sh ]; then
+            	ln -s ~/class/a07/q02/q02.sh model.sh
+            fi
+            
+            if [ ! -e env_mysql ]; then
+            	ln -s ~/class/a07/q01/env_mysql env_mysql
+            fi
+            source env_mysql
+            
+            if [ -e $rep ]; then
+            	rm $rep
+            	touch $rep
+            fi
+            
+            
+            ### sql code
+            cat > q04.sql << SQL
+            	use sales;
+            	select distinct(model_name) from sales_2010;
+            SQL
+            
+            
+            ### model names into a models array
+            models=($(mysql -u $MYSQLU -p$MYSQLP < q04.sql 2> /dev/null | grep -v model_name))
+            
+            
+            ### model name validation
+            for m in "${models[@]}"
+            do
+            	if [ "$m" == "$model" ]; then
+            		match=1
+            	fi
+            done
+            
+            if [ "$match" == "0" ]; then
+            	echo "Invalid model name: $model"
+            	if [ -e $rep ]; then
+            		rm $rep
+            	fi
+            	exit
+            fi
+            
+            echo "Sales, Profit and Discount Report for the $model" >> $rep
+            echo " " >> $rep
+            
+            for type in all new used
+            do
+            	echo "Type=$type" >> $rep
+            	echo "Number 	Dealer	 Sales	 List 	  Profit	Discount	Average	  	Average" >> $rep
+            	echo "Year 	Sold	 Cost 	 Value	  Price		Total 		Profit		Discount" >> $rep
+            	echo "=====	=====	 =====	 =====	  =====		========	=======		========" >> $rep
+            
+            	for year in {2010..2016}
+            	do
+            		salesdata=($(./model.sh $year $model $type))
+            		number=${salesdata[1]}
+            		dcost=${salesdata[2]}
+            		psold=${salesdata[3]}
+            		plist=${salesdata[4]}
+            		profit=$(( psold - dcost ))
+            		discount=$(( plist - psold ))
+            		avg_price=($(echo "scale=2;$profit/$number" | bc))
+            		avg_disc=($(echo "scale=2;$discount/$number" | bc))
+            		printf "%4s %9s %10s %10s %10s %10s %10s %8s %9s\n" $( echo "${salesdata[@]} $profit $discount $avg_price $avg_disc") >> $rep
+            	done
+            	echo " ================================================ " >> $rep
+            	echo " " >> $rep
+            done
+
+        End output of q04.sh
+
+    All files found for question 4.
+END QUESTION 4
+
+BEGIN QUESTION 5
+    Checking for required files
+
+        Start output of a05.txt
+            QUESTION 5: Script Creation
+            
+            Please do NOT delete any characters in this file.
+            The file a05.bak contains a backup copy of this file if you need it.
+            Create your script in the file q05.sh. Enter DONE on the line below
+            when you have completed your work.
+            
+            A. DONE 
+            
+            END OF QUESTION 5: This unedited file contains 320 characters.
+
+        End output of a05.txt
+
+
+        Start output of check05.txt
+            Checking for reports and archived tar file - please wait
+                       OK - all reports present                                            chxq05-A1
+                       OK - models.tar file found in archive                               chxq05-B1
+                       OK - all model reports archived                                     chxq05-C1
+            
+
+        End output of check05.txt
+
+
+        Start output of q05.sh
+            #!/bin/bash
+            
+            
+            ### validation for soft link
+            if [ ! -e env_mysql ]; then
+            	ln -s ~/class/a07/q01/env_mysql env_mysql
+            fi
+            source env_mysql
+            
+            ### sql
+            cat > q05.sql << SQL
+            	use sales;
+            	select distinct(model_name) from sales_2010;
+            SQL
+            
+            ### array the models
+            model_name=($(mysql -u $MYSQLU -p$MYSQLP < q05.sql 2> /dev/null | grep -v model_name))
+            	for model in "${model_name[@]}"
+            	do
+            	(
+            		cd ~/class/a07/q04
+            		./q04.sh $model
+            		if [ -e report.tmp ]; then
+            			cp report.tmp "../../../reports/$model"".txt"
+            			rm report.tmp
+            		fi
+            	)
+            	done
+            	(
+            		cd ~/reports
+            		reports=( $(ls *.txt) )
+            		tar -cf models.tar ${reports[@]}
+            		mv models.tar ~/archive
+            	)
+            
+
+        End output of q05.sh
+
+    All files found for question 5.
+END QUESTION 5
+
+    Begin summary of file submissions
+        Files needed  = 16
+        Files found   = 16
+        Files missing = 0
+    End summary of file submissions
+
+Activity 7: submission file lab07.txt completed
